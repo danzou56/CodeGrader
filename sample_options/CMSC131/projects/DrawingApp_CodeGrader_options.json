@@ -1,9 +1,7 @@
 {
     "course": "CMSC131",
     "filesToCheck": [
-        "WebPageGen/src/main/java/programs/Access.java|src/programs/Access.java|programs/Access.java",
-        "WebPageGen/src/main/java/programs/Convert.java|src/programs/Convert.java|programs/Convert.java",
-        "WebPageGen/src/main/java/programs/ThrowDie.java|src/programs/ThrowDie.java|programs/ThrowDie.java"
+        "DrawingApp/src/main/java/app/DrawingApp.java|src/app/DrawingApp.java|app/DrawingApp.java"
     ],
     "lateScoreAdjustment": -12,
     "moduleOptions": {
@@ -13,7 +11,7 @@
         },
         "grade_server_module": {
             "enabled": true,
-            "gradeServerAssignmentName": "P2",
+            "gradeServerAssignmentName": "P3",
             "graderName": "",
             "maximumCodeStyleScore": 8,
             "maximumStudentTestsScore": 0,
@@ -44,8 +42,7 @@
         "naming_module": {
             "allowedSpecialWords": [
                 "min",
-                "max",
-                "args"
+                "max"
             ],
             "checkConstants": true,
             "checkMethods": true,
@@ -83,7 +80,7 @@
         }
     },
     "semesterSeason": "spring",
-    "submitServerAssignmentName": "Proj 2",
+    "submitServerAssignmentName": "Proj 3",
     "usageStatisticsOptions": {
         "anonymizeUser": true,
         "enabled": true

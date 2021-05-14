@@ -5,53 +5,6 @@
 // UTILITY FUNCTIONS & CLASSES
 
 
-class TypeInformation {
-    constructor() {
-        /** @type {Array.<MethodCall>}*/
-        this.methodCalls = [];
-        /** @type {Array.<Declaration>}*/
-        this.declarations = [];
-        /** @type {Array.<Loop>}*/
-        this.loops = [];
-        /** @type {Array.<Scope>}*/
-        this.scopes = [];
-        this.ternaryExpressions = [];
-        this.binaryExpressions = [];
-        this.unaryExpressions = [];
-        this.assignments = [];
-        /** @type {Array.<Usage>}*/
-        this.usages = [];
-        this.typeScope = null;
-    }
-}
-
-class CodeFile {
-    constructor(filename, sourceCode, trCodeLines, abstractSyntaxTree, parseError, fromLineIndex, toLineIndex) {
-        this.filename = filename;
-        this.sourceCode = sourceCode;
-        this.codeLines = sourceCode.split("\n");
-        this.codeLineLengths = this.codeLines.map(codeLine => codeLine.length);
-        let offset = 0;
-        /** @type {Array.<Number>}*/
-        this.lineStartOffsets = [];
-        /** @type {Array.<Number>}*/
-        this.lineEndOffsets = [];
-        $.each(this.codeLineLengths, (iLine, length) => {
-            this.lineStartOffsets.push(offset);
-            offset += length;
-            this.lineEndOffsets.push(offset);
-        });
-        this.trCodeLines = trCodeLines;
-        this.abstractSyntaxTree = abstractSyntaxTree;
-        this.parseError = parseError;
-        this.fromLineIndex = fromLineIndex;
-        this.toLineIndex = toLineIndex;
-
-        /**@type {Map.<string, TypeInformation>}*/
-        this.types = new Map();
-    }
-}
-
 function parseJavaCode(fileCode) {
     let abstractSyntaxTree = null;
     let parseError = null;
@@ -102,6 +55,7 @@ function getCheckedFileCode(filesToCheck) {
             const trCodeLinesForFile = getTrCodesForCodeFile(filename);
             let fileCodeLines = [];
             const iStartLine = iLine;
+
             $.each(
                 trCodeLinesForFile,
                 function (trCodeLineIndex, trCodeLine) {
@@ -110,6 +64,7 @@ function getCheckedFileCode(filesToCheck) {
                     iLine++;
                 }
             );
+
             const iEndLine = iLine;
             if (fileCodeLines.length > 0) {
                 // parser doesn't like comments after closing brace at the end of the last line of file for whatever reason
@@ -118,6 +73,7 @@ function getCheckedFileCode(filesToCheck) {
             const fileCode = fileCodeLines.join("\n");
 
             const [abstractSyntaxTree, parseError] = parseJavaCode(fileCode);
+
             fileDictionary.set(filename, new CodeFile(filename, fileCode, trCodeLinesForFile, abstractSyntaxTree, parseError, iStartLine, iEndLine));
             trCodeLines.push(...trCodeLinesForFile);
         }
@@ -125,7 +81,6 @@ function getCheckedFileCode(filesToCheck) {
     return [fileDictionary, trCodeLines];
 }
 
-//TODO: use in indentation_module instead of countIndent after Matt is done working on it
 /**
  * Gets width of indentation, in spaces or space-equivalents, for a given code line
  * @param {string} codeLine
@@ -135,8 +90,19 @@ function getCheckedFileCode(filesToCheck) {
 let indentationRegEx = /^(?:.*\*\/|\s*\/\*.*\*\/)?\s*/;
 
 function getIndentationWidth(codeLine, tabWidth = 4) {
-    let tabReplacement = " ".repeat(tabWidth);
+    const tabReplacement = " ".repeat(tabWidth);
     return codeLine.match(indentationRegEx)[0].replaceAll("\t", tabReplacement).length;
+}
+
+/**
+ * Gets width of text, in characters, for a given code line
+ * @param {string} codeLine
+ * @param {number} tabWidth assumed tab width
+ * @return {number} code line character count
+ */
+function getLineCharacterWidth(codeLine, tabWidth = 4) {
+    const tabReplacement = " ".repeat(tabWidth);
+    return codeLine.replaceAll("\t", tabReplacement).length;
 }
 
 function removeIndentation(codeLine) {
@@ -372,7 +338,7 @@ function validateNumericInput(numberText, minimumValue, maximumValue) {
     } else {
         const score = parseInt(numberText);
         if (score < minimumValue || score > maximumValue) {
-            alert("You must enter a number between ");
+            alert("You must enter a number in range [" + minimumValue + ", " + maximumValue + "].");
             return [false, 0];
         } else {
             return [true, score];
@@ -388,4 +354,24 @@ function validateStringListOption(value, optionPath, allowedValues, defaultValue
         return defaultValue;
     }
     return value;
+}
+
+
+function getFloatAtStartOfString(string) {
+    return parseFloat(string.match(/(\d+[.]?\d*).*/)[1]);
+}
+
+/**
+ * Get width of the (presumably) monospace characters from the font in the computed style of the provided element.
+ * @param {Element} element HTML element whose computed style to use to get the font
+ */
+function getMonospaceCharacterWidth(element) {
+    // if given, use cached canvas for better performance
+    // else, create new canvas
+    const canvas = getMonospaceCharacterWidth.canvas || (getMonospaceCharacterWidth.canvas = document.createElement("canvas"));
+    const context = canvas.getContext("2d");
+    context.font = window.getComputedStyle(element).getPropertyValue("font");
+    const sampleText = "1234567890ABCDEFGHIJKLMNOPQURSTUVWXYZ~!@#$%^&*()_+/abcdefghijklmnopqrstuvwxyz :;\",.?{}[]|";
+    const metrics = context.measureText("1234567890ABCDEFGHIJKLMNOPQURSTUVWXYZ~!@#$%^&*()_+/abcdefghijklmnopqrstuvwxyz :;\",.?{}[]|");
+    return metrics.width / sampleText.length;
 }

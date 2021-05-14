@@ -19,20 +19,27 @@
             "css/highlight.min.css"
          ],
          "js": [
-            "third_party/javaparser7.min.js",
+            "third_party/javaparser15.min.js",
             "third_party/highlight.min.js",
             "third_party/jquery-3.5.1.min.js", 
             "third_party/underscore-min.js", 
             "third_party/mustache.js", 
             "third_party/bootstrap.min.js",
+            "third_party/json5.min.js",
+            "code_analysis/module.js",
+            "code_analysis/code_entity_types.js",
+            "code_analysis/auxiliary_analytic_routines.js",
+            "code_analysis/code_entity_search.js",
+            "code_analysis/code_file.js",
+            "code_analysis/type_information.js",
             "options.js",
-            "code_analysis.js",
             "utilities.js",
             "submit_server_ui.js",
             "modules/brace_style_module.js",
             "modules/grade_server_module.js",
             "modules/indentation_module.js",
             "modules/keyword_and_pattern_module.js",
+            "modules/line_length_module.js",
             "modules/loop_module.js",
             "modules/method_call_module.js",
             "modules/naming_module.js",
@@ -71,5 +78,5 @@
    "permissions": [ "tabs", "storage", "activeTab", "idle", "alarms", "http://*.cs.umd.edu/*", "https://*.cs.umd.edu/*", "http://*.cs.umd.edu/", "https://*.cs.umd.edu/", "file:///*" ],
    "update_url": "https://clients2.google.com/service/update2/crx",
    "version": "1.0",
-   "version_name": "1.0 alpha"
+   "version_name": "1.0 beta"
 }

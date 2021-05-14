@@ -36,11 +36,16 @@ class Options {
         this.submitServerAssignmentName = submitServerAssignmentName;
         this.filesToCheck = filesToCheck;
         this.lateScoreAdjustment = -12;
+        this.firstStudent = "a";
+        // To include directory IDs that start with z, use ASCII codepoint directly
+        // after z as the default upper bound
+        this.lastStudent = "{";
         this.moduleOptions = {
             "brace_style_module": brace_style_module.getDefaultOptions(),
             "grade_server_module": grade_server_module.getDefaultOptions(),
             "indentation_module": indentation_module.getDefaultOptions(),
             "keyword_and_pattern_module": keyword_and_pattern_module.getDefaultOptions(),
+            "line_length_module": line_length_module.getDefaultOptions(),
             "loop_module": loop_module.getDefaultOptions(),
             "method_call_module": method_call_module.getDefaultOptions(),
             "naming_module": naming_module.getDefaultOptions(),
@@ -69,17 +74,30 @@ function restoreOptions(callback) {
 
 // Saves options to chrome.storage
 function saveOptions() {
-    let needsReload = false;
     try {
-        let options = JSON.parse(document.getElementById("optionsTextArea").value);
+        const optionsStr = document.getElementById("optionsTextArea").value;
+        let options = JSON5.parse(optionsStr);
         if (options.lateScoreAdjustment > 0) {
             alert("Late score adjustment has to be negative. Defaulting the value to 0.");
             options.lateScoreAdjustment = 0;
-            needsReload = true;
         }
+
+        // If firstStudent isn't a valid field, trim will produce undefined (falsey)
+        // so the field will default to "a". Conveniently, this also means firstStudent
+        // can't be the empty string since that's also falsey.
+        options.firstStudent = options.firstStudent?.trim() || "a";
+        // To include directory IDs that start with z, use ASCII codepoint directly
+        // after z as the default upper bound
+        options.lastStudent = options.lastStudent?.trim() || "{";
+        if (options.firstStudent > options.lastStudent) {
+            const tmp = options.firstStudent;
+            options.firstStudent = options.lastStudent;
+            options.lastStudent = tmp;
+        }
+
         chrome.storage.sync.set(
-            options
-            , function () {
+            options,
+            function () {
                 // Update status to let user know options were saved.
                 let status = document.getElementById('status');
                 status.textContent = 'Options saved.';
@@ -87,10 +105,11 @@ function saveOptions() {
                     status.textContent = '';
                 }, 750);
             });
+        
     } catch (error) {
         if (error instanceof SyntaxError) {
             let status = document.getElementById('status');
-            status.textContent = 'JSON Syntax Error(check console)';
+            status.textContent = 'JSON5 Syntax Error(check console)';
             setTimeout(function () {
                 status.textContent = '';
             }, 3000);
@@ -104,23 +123,20 @@ function saveOptions() {
             throw error;
         }
     }
-    if (needsReload) {
-        restoreOptionsLocal();
-    }
 }
 
 // Restores options based on values stored in chrome.storage.
 function restoreOptionsLocal() {
     restoreOptions(
         function (options) {
-            document.getElementById('optionsTextArea').value = JSON.stringify(options, null, 4);
+            document.getElementById('optionsTextArea').value = JSON5.stringify(options, null, 4);
         }
     );
 }
 
 function restoreDefaults() {
     let options = new Options();
-    document.getElementById('optionsTextArea').value = JSON.stringify(options, null, 4);
+    document.getElementById('optionsTextArea').value = JSON5.stringify(options, null, 4);
     saveOptions();
 }
 
